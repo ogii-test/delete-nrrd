@@ -448,7 +448,7 @@ const initLocation = lookup => {
 const insertRevenue = async (commodity_id, location_id, period_id, duplicate_no, raw_revenue, row) => {
   const revenue = cleanValue(raw_revenue)
   try {
-    const insert = await db.query('insert into revenue( location_id, period_id, commodity_id, duplicate_no, revenue , raw_revenue) values ($1 , $2 , $3 , $4 , $5, $6 )', [location_id, period_id, commodity_id, duplicate_no, revenue, raw_revenue])
+    const insert = await db.query('insert into revenue( location_id, period_id, commodity_id, duplicate_no, revenue , raw_revenue, row_number) values ($1 , $2 , $3 , $4 , $5, $6, $7 )', [location_id, period_id, commodity_id, duplicate_no, revenue, raw_revenue, row.__line])
   }
   catch (err) {
     if (err.stack.match('duplicate')) {
