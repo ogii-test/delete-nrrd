@@ -114,7 +114,7 @@ const BaseSelectInput = ({
   const noop = () => {}
 
   // Single Select Input
-  const BaseSingleSelectInput = ({ data, defaultSelected, selected, label, helperText, variant, showClearSelected, theme, onChange, disabled }) => {
+  const BaseSingleSelectInput = ({ data, defaultSelected, selected, label, helperText, variant, showClearSelected, theme, onChange, disabled, native = false }) => {
     const classes = useStyles()
     const labelSlug = formatToSlug(label)
 
@@ -171,18 +171,35 @@ const BaseSelectInput = ({
           classes={{ root: classes.selectInput }}
           native
         >
-          {showClearSelected &&
-          <option value={'Clear'}>
-            <em>Clear selected</em>
-          </option>
+          {(showClearSelected && !native)
+            ? <MenuItem value={'Clear'}>
+              <em>Clear selected</em>
+            </MenuItem>
+            : <option value={'Clear'}>
+              <em>Clear selected</em>
+            </option>
           }
           {data &&
-           data.map((item, i) =>
-             <option
-               key={`${ item.option }_${ i }`}
-               value={item.value || item.option}>
-               {item.option}
-             </option>)
+           data.map((item, i) => {
+             if (!native) {
+               return (
+                 <MenuItem
+                   key={`${ item.option }_${ i }`}
+                   value={item.value || item.option}>
+                   {item.option}
+                 </MenuItem>
+               )
+             }
+             else {
+               return (
+                 <option
+                   key={`${ item.option }_${ i }`}
+                   value={item.value || item.option}>
+                   {item.option}
+                 </option>
+               )
+             }
+           })
           }
         </Select>
         {helperText &&
