@@ -95,7 +95,7 @@ const BaseInput = withStyles(theme =>
  * This is used to create a single or multi select drop down.
  */
 const BaseSelectInput = ({
-  data, onChange, selectType, defaultSelected, selected, defaultSelectAll, helperText, label, variant, showClearSelected, theme, disabled, native, ...props
+  data, onChange, selectType, defaultSelected, selected, defaultSelectAll, helperText, label, variant, showClearSelected, theme, disabled, ...props
 }) => {
   if (data && data.length > 0 && !data[0].option) {
     data = data.map(item => ({ option: item }))
@@ -114,7 +114,7 @@ const BaseSelectInput = ({
   const noop = () => {}
 
   // Single Select Input
-  const BaseSingleSelectInput = ({ data, defaultSelected, selected, label, helperText, variant, showClearSelected, theme, onChange, disabled, native }) => {
+  const BaseSingleSelectInput = ({ data, defaultSelected, selected, label, helperText, variant, showClearSelected, theme, onChange, disabled }) => {
     const classes = useStyles()
     const labelSlug = formatToSlug(label)
 
@@ -150,18 +150,6 @@ const BaseSelectInput = ({
       }
     }
 
-    let clearSelected
-    if (native) {
-      clearSelected = <option value={'Clear'}>
-        <em>Clear selected</em>
-      </option>
-    }
-    else {
-      clearSelected = <MenuItem value={'Clear'}>
-        <em>Clear selected</em>
-      </MenuItem>
-    }
-
     useEffect(() => {
       if (selected && !isEqual(selected, selectedOption)) {
         handleChange(selected)
@@ -181,33 +169,20 @@ const BaseSelectInput = ({
           label={label}
           input={theme}
           classes={{ root: classes.selectInput }}
-          native={native}
         >
           {showClearSelected &&
-            clearSelected
+            <MenuItem value={'Clear'}> : <MenuItem value={'Clear'}></MenuItem>
+              <em>Clear selected</em>
+            </MenuItem>
           }
           {data &&
-           data.map((item, i) => {
-             if (!native) {
-               return (
-                 <MenuItem
-                   key={`${ item.option }_${ i }`}
-                   value={item.value || item.option}>
-                   {item.option}
-                 </MenuItem>
-               )
-             }
-             else {
-               return (
-                 <option
-                   key={`${ item.option }_${ i }`}
-                   value={item.value || item.option}>
-                   {item.option}
-                 </option>
-               )
-             }
-           })
-          }
+           data.map((item, i) => (
+             <MenuItem
+               key={`${ item.option }_${ i }`}
+               value={item.value || item.option}>
+               {item.option}
+             </MenuItem>
+           ))}
         </Select>
         {helperText &&
         <FormHelperText>{helperText}</FormHelperText>
@@ -414,8 +389,7 @@ const BaseSelectInput = ({
           theme={theme || <BaseInput />}
           showClearSelected={showClearSelected}
           onChange={onChange || noop}
-          disabled={disabled}
-          native={true} />
+          disabled={disabled} />
       }
       {selectType === 'Multi' &&
         <BaseMultiSelectInput
