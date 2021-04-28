@@ -95,7 +95,7 @@ const BaseInput = withStyles(theme =>
  * This is used to create a single or multi select drop down.
  */
 const BaseSelectInput = ({
-  data, onChange, selectType, defaultSelected, selected, defaultSelectAll, helperText, label, variant, showClearSelected, theme, disabled, ...props
+  data, onChange, selectType, defaultSelected, selected, defaultSelectAll, helperText, label, variant, showClearSelected, theme, disabled, native, ...props
 }) => {
   if (data && data.length > 0 && !data[0].option) {
     data = data.map(item => ({ option: item }))
@@ -114,7 +114,7 @@ const BaseSelectInput = ({
   const noop = () => {}
 
   // Single Select Input
-  const BaseSingleSelectInput = ({ data, defaultSelected, selected, label, helperText, variant, showClearSelected, theme, onChange, disabled, native = false }) => {
+  const BaseSingleSelectInput = ({ data, defaultSelected, selected, label, helperText, variant, showClearSelected, theme, onChange, disabled, native }) => {
     const classes = useStyles()
     const labelSlug = formatToSlug(label)
 
@@ -407,7 +407,8 @@ const BaseSelectInput = ({
           theme={theme || <BaseInput />}
           showClearSelected={showClearSelected}
           onChange={onChange || noop}
-          disabled={disabled} />
+          disabled={disabled}
+          native={false} />
       }
       {selectType === 'Multi' &&
         <BaseMultiSelectInput
