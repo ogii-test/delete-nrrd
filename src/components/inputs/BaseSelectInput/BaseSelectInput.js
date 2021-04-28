@@ -150,6 +150,18 @@ const BaseSelectInput = ({
       }
     }
 
+    let clearSelected
+    if (native) {
+      clearSelected = <option value={'Clear'}>
+        <em>Clear selected</em>
+      </option>
+    }
+    else {
+      clearSelected = <MenuItem value={'Clear'}>
+        <em>Clear selected</em>
+      </MenuItem>
+    }
+
     useEffect(() => {
       if (selected && !isEqual(selected, selectedOption)) {
         handleChange(selected)
@@ -169,15 +181,10 @@ const BaseSelectInput = ({
           label={label}
           input={theme}
           classes={{ root: classes.selectInput }}
-          native
+          native={native}
         >
-          {(showClearSelected && !native)
-            ? <MenuItem value={'Clear'}>
-              <em>Clear selected</em>
-            </MenuItem>
-            : <option value={'Clear'}>
-              <em>Clear selected</em>
-            </option>
+          {showClearSelected &&
+            clearSelected
           }
           {data &&
            data.map((item, i) => {
