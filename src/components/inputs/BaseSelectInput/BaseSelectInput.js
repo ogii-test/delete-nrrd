@@ -415,7 +415,7 @@ const BaseSelectInput = ({
           showClearSelected={showClearSelected}
           onChange={onChange || noop}
           disabled={disabled}
-          native={false} />
+          native={true} />
       }
       {selectType === 'Multi' &&
         <BaseMultiSelectInput
