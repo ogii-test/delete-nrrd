@@ -2,13 +2,13 @@ import React, { useContext } from 'react'
 import { useQuery } from '@apollo/react-hooks'
 import gql from 'graphql-tag'
 
-import { CircleChart } from '../../../data-viz/CircleChart/CircleChart'
+import { CircleChart } from '../../../data-viz/CircleChart'
 import QueryLink from '../../../../components/QueryLink'
 
 import { DataFilterContext } from '../../../../stores/data-filter-store'
 import { DATA_FILTER_CONSTANTS as DFC } from '../../../../constants'
 import { formatToDollarInt } from '../../../../js/utils'
-
+import { useInView } from 'react-intersection-observer'
 import { makeStyles } from '@material-ui/core/styles'
 import {
   Box
@@ -57,6 +57,13 @@ const DisbursementSources = props => {
   const classes = useStyles()
 
   const state = props.fipsCode
+  const xAxis = 'source'
+  const yAxis = 'total'
+  const { ref, inView, entry } = useInView({
+    /* Optional options */
+    threshold: 0,
+    triggerOnce: true
+  })
 
   const { loading, error, data } = useQuery(APOLLO_QUERY, {
     variables: { state: state, year: year, period: DFC.FISCAL_YEAR_LABEL }
@@ -75,18 +82,26 @@ const DisbursementSources = props => {
     chartData = data
     if (chartData.DisbursementSourceSummary.length > 1) {
       return (
-        <Box className={classes.root}>
+        <Box className={classes.root} ref={ref}>
           <Box component="h4" fontWeight="bold">Disbursements by source</Box>
           <Box>
             <CircleChart
               key={`DS__${ dataSet }`}
               data={chartData.DisbursementSourceSummary}
-              xAxis='source'
-              yAxis='total'
-              legendLabels={['Source', 'Total']}
+              xAxis={xAxis}
+              yAxis={yAxis}
+              legendHeaders={['Source', 'Total']}
               showLabels={false}
               showTooltips={true}
-              format={d => formatToDollarInt(d)} />
+              legendFormat={d => formatToDollarInt(d)}
+              chartTooltip={
+                d => {
+                  const r = []
+                  r[0] = d.data[xAxis]
+                  r[1] = formatToDollarInt(d.data[yAxis])
+                  return r
+                }
+              } />
             <QueryLink
               groupBy={DFC.SOURCE}
               linkType="FilterTable"
@@ -101,7 +116,7 @@ const DisbursementSources = props => {
     else if (chartData.DisbursementSourceSummary.length === 1) {
 	  const source = chartData.DisbursementSourceSummary[0].source
       return (
-        <Box className={classes.boxSection}>
+        <Box className={classes.boxSection} ref={ref}> >
           <Box component="h4" fontWeight="bold">Disbursements by source</Box>
           <Box fontSize="subtitle2.fontSize">
           All of  disbursements were from {source.toLowerCase()} production.</Box>
@@ -111,7 +126,7 @@ const DisbursementSources = props => {
   }
 
   return (
-    <Box className={classes.root}>&nbsp;</Box>
+    <Box className={classes.root} ref={ref}>&nbsp;</Box>
   )
 }
 

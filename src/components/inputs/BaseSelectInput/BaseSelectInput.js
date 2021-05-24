@@ -69,6 +69,7 @@ const BaseInput = withStyles(theme =>
   createStyles({
     root: {
       marginTop: theme.spacing(0.5),
+      textAlign: 'left',
       'label + &': {
         marginTop: theme.spacing(1.5),
       },
@@ -92,8 +93,7 @@ const BaseInput = withStyles(theme =>
 )(InputBase)
 
 /**
- * This is used to create a single or multi select drop down
- *
+ * This is used to create a single or multi select drop down.
  */
 const BaseSelectInput = ({
   data, onChange, selectType, defaultSelected, selected, defaultSelectAll, helperText, label, variant, showClearSelected, theme, disabled, ...props
@@ -120,9 +120,9 @@ const BaseSelectInput = ({
     const labelSlug = formatToSlug(label)
 
     /**
-   * We have multiple ways to specify a default value. It will check to see if a defaultSelected has been specified.
-   * If not it will check to see if an option has been set as default = true
-   */
+     * We have multiple ways to specify a default value. It will check to see if a defaultSelected has been specified.
+     * If not it will check to see if an option has been set as default = true
+     */
     const getDefaultSelected = () => {
       let defaultItem
       if (data) {
@@ -170,19 +170,20 @@ const BaseSelectInput = ({
           label={label}
           input={theme}
           classes={{ root: classes.selectInput }}
+          native
         >
           {showClearSelected &&
-          <MenuItem value={'Clear'}>
+          <option value={'Clear'}>
             <em>Clear selected</em>
-          </MenuItem>
+          </option>
           }
           {data &&
            data.map((item, i) =>
-             <MenuItem
+             <option
                key={`${ item.option }_${ i }`}
                value={item.value || item.option}>
                {item.option}
-             </MenuItem>)
+             </option>)
           }
         </Select>
         {helperText &&

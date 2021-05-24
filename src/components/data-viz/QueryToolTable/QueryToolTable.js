@@ -22,7 +22,8 @@ import {
   RECIPIENT,
   COMPANY_NAME,
   PERIOD_MONTHLY,
-  MONTH_LONG
+  MONTH_LONG,
+  STATE_OFFSHORE_NAME
 } from '../../../constants'
 import { DataFilterContext } from '../../../stores/data-filter-store'
 import { DownloadContext } from '../../../stores/download-store'
@@ -32,6 +33,8 @@ import withQueryManager from '../../withQueryManager'
 import { QueryToolTableProvider, QueryToolTableContext } from '../../../stores'
 
 import Skeleton from '@material-ui/lab/Skeleton'
+import Backdrop from '@material-ui/core/Backdrop'
+import LinearProgress from '@material-ui/core/LinearProgress'
 import CustomTable from './Custom/CustomTable'
 import CustomTableHead from './Custom/CustomTableHead'
 import CustomTableCell from './Custom/CustomTableCell'
@@ -44,6 +47,7 @@ import TotalProvider from './Custom/TotalProvider'
 import CustomGroupCellContent from './Custom/CustomGroupCellContent'
 
 import {
+  withStyles,
   makeStyles,
   Box,
   Grid
@@ -123,7 +127,9 @@ const QueryToolTable = withQueryManager(({ data, loading }) => {
     })
   }
 
-  const getSortColumn = () => [{ columnName: years[years.length - 1]?.toString(), direction: 'desc' }]
+  const getSortColumn = () => (dfc[PERIOD] === PERIOD_MONTHLY)
+    ? [{ columnName: MONTH_LONG, direction: 'asc' }]
+    : [{ columnName: years[years.length - 1]?.toString(), direction: 'desc' }]
 
   const getHideColumns = () => years.filter(year =>
     (dfc[PERIOD] === PERIOD_FISCAL_YEAR)
@@ -148,6 +154,7 @@ const QueryToolTable = withQueryManager(({ data, loading }) => {
         sortColumn: getSortColumn(),
         tableHeight: _tableHeight,
         [ADDITIONAL_COLUMNS]: getAdditionalColumns(),
+        includeAdditionalColumsInGroupBy: (dfc[PERIOD] === PERIOD_MONTHLY),
         ...dfc
       })
     }
@@ -166,12 +173,31 @@ const QueryToolTable = withQueryManager(({ data, loading }) => {
     throw new Error('Data Filter Context has an undefined state. Please verify you have the Data Filter Provider included in your page or component.')
   }
 
+  const BorderLinearProgress = withStyles(theme => ({
+    root: {
+      height: 10,
+      width: '-webkit-fill-available'
+    },
+    bar: {
+      backgroundColor: theme.palette.blue[200],
+    },
+  }))(LinearProgress)
+
   return (
     <Box className={classes.root}>
+      <Box zIndex="tooltip" position="absolute">
+        <Backdrop open={loading} />
+      </Box>
+
       <Grid container spacing={2}>
         {loading &&
           <Grid item xs={12}>
-            <Skeleton variant="rect" width={'100%'} height={_tableHeight} />
+            <Box zIndex="snackbar" style={{ width: '-webkit-fill-available' }}>
+              <BorderLinearProgress />
+            </Box>
+            <Box zIndex="modal">
+              <Skeleton variant="rect" width={'100%'} height={_tableHeight} animation={false}/>
+            </Box>
           </Grid>
         }
         {(tableData && dataTableConfig) &&
@@ -398,6 +424,10 @@ const DataTableBase = ({ data, config }) => {
       setColumnNames(colNames)
       setDefaultColumnWidths(colNames.map((column, index) => {
         let width = (parseInt(column.name) > 100) ? 200 : 250
+
+        if (column.name === STATE_OFFSHORE_NAME) {
+          width = 325
+        }
         if (column.name === RECIPIENT) {
           width = 350
         }
@@ -441,6 +471,15 @@ const DataTableBase = ({ data, config }) => {
         setExpandedGroups([...new Set(data.map(item => item[_groupBy]))])
       }
       setFixedColumns([TableGroupRow.Row, _groupBy, _breakoutBy])
+    }
+    else if (_additionalColumns && config.includeAdditionalColumsInGroupBy) {
+      setGrouping([{ columnName: _groupBy }])
+      setGroupingExtension([{ columnName: _groupBy, showWhenGrouped: true }])
+      if (data && data.length > 0) {
+        // Gets the unique values that will be expanded
+        setExpandedGroups([...new Set(data.map(item => item[_groupBy]))])
+      }
+      setFixedColumns([TableGroupRow.Row, _groupBy, _additionalColumns[0]])
     }
     else if (_groupBy) {
       setGrouping([])
@@ -588,11 +627,9 @@ const DataTableBase = ({ data, config }) => {
             </TableGrid>
           </Grid>
         </Grid>
-        : <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <Skeleton variant="rect" width={'100%'} height={config.tableHeight} />
-          </Grid>
-        </Grid>
+        : <Box zIndex="modal">
+          <Skeleton variant="rect" width={'100%'} height={config.tableHeight} animation={false}/>
+        </Box>
       }
     </React.Fragment>
   )

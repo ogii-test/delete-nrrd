@@ -11,6 +11,8 @@ import {
   DATA_FILTER_CONSTANTS as DFC,
   DISPLAY_NAMES
 } from '../../../../constants'
+import { useInView } from 'react-intersection-observer'
+import CircularProgress from '@material-ui/core/CircularProgress'
 
 import {
   Box,
@@ -25,6 +27,7 @@ import {
 } from '@material-ui/core/styles'
 
 import StackedBarChart from '../../../data-viz/StackedBarChart/StackedBarChart'
+import { HorizontalStackedBarChart } from '../../../data-viz/StackedBarChart'
 import DisbursementLocationTotal from './DisbursementLocationTotal'
 
 import utils from '../../../../js/utils'
@@ -62,9 +65,14 @@ const NationwideDisbursementSummary = props => {
   const dataSet = 'FY ' + year
 
   const { title } = props
-
+  const { ref, inView, entry } = useInView({
+    /* Optional options */
+    threshold: 0,
+    triggerOnce: true
+  })
   const { loading, error, data } = useQuery(NATIONWIDE_DISBURSEMENT_SUMMARY_QUERY, {
-    variables: { year }
+    variables: { year },
+    skip: inView === false
   })
 
   const yOrderBy = ['Federal Onshore', 'Federal Offshore', 'Native American', 'Federal - Not tied to a lease']
@@ -77,7 +85,12 @@ const NationwideDisbursementSummary = props => {
   const yGroupBy = 'source'
   const xLabels = 'month'
   const units = 'dollars'
-  // const xGroups = {}
+  const colorRange = [
+    theme.palette.explore[700],
+    theme.palette.explore[500],
+    theme.palette.explore[300],
+    theme.palette.explore[100]
+  ]
 
   const createMarkup = markup => {
     return { __html: markup }
@@ -98,7 +111,7 @@ const NationwideDisbursementSummary = props => {
     nationwideSummaryData = Object.entries(groupData)
 
     return (
-      <Container id={utils.formatToSlug(title)}>
+      <Container id={utils.formatToSlug(title)} ref={ref} >
         <Grid container>
           <Grid item md={12}>
             <Box mt={10} mb={1} color="secondary.main" borderBottom={5}>
@@ -161,7 +174,7 @@ const NationwideDisbursementSummary = props => {
                       </Grid>
                       <Grid container item xs={12} sm={7}>
                         <Box mt={{ xs: 0, sm: 4 }} width="100%">
-                          <StackedBarChart
+                          <HorizontalStackedBarChart
                             key={`NDS${ dataSet }`}
                             data={item[1]}
                             legendFormat={v => {
@@ -172,13 +185,9 @@ const NationwideDisbursementSummary = props => {
                                 return utils.formatToDollarInt(v)
                               }
                             }}
-                            legendHeaders={ headers => {
-                            // console.debug('headers..................', headers)
-                              headers[0] = ''
-                              headers[1] = ''
-                              return headers
-                            }
-                            }
+                            // legendHeaders two dimensional array
+                            legendHeaders={['', '']}
+                            // chartTooltip two dimensional array
                             chartTooltip={
                               d => {
                                 const r = []
@@ -197,12 +206,7 @@ const NationwideDisbursementSummary = props => {
                             yOrderBy={yOrderBy}
                             horizontal
                             legendReverse={true}
-                            colorRange={[
-                              theme.palette.explore[700],
-                              theme.palette.explore[500],
-                              theme.palette.explore[300],
-                              theme.palette.explore[100]
-                            ]}
+                            colorRange={colorRange}
                           />
                         </Box>
                       </Grid>
@@ -216,7 +220,11 @@ const NationwideDisbursementSummary = props => {
     )
   }
   else {
-    return (null)
+    return (
+      <Box display="flex" justifyContent="center" id={utils.formatToSlug(title)} ref={ref} height={300}>
+        <CircularProgress />
+      </Box>
+    )
   }
 }
 
