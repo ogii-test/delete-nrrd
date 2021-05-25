@@ -67,6 +67,7 @@
     "pg": "^7.18.2",
     "prop-types": "^15.7.2",
     "puppeteer": "^5.3.1",
+    "query-string": "^7.0.0",
     "react": "^16.13.1",
     "react-device-detect": "^1.13.1",
     "react-dom": "^16.13.1",
@@ -89,7 +90,7 @@
     "typeface-lato": "0.0.75",
     "typescript": "^2.8.0",
     "url-search-params-polyfill": "^7.0.0",
-    "use-query-params": "^1.1.4"
+    "use-query-params": "^1.2.2"
   },
   "devDependencies": {
     "@babel/helper-create-regexp-features-plugin": "^7.10.4",
