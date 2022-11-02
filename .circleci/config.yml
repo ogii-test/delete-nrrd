@@ -525,13 +525,6 @@ jobs:
           command: |
             ls -lart static/downloads
            # rm static/downloads/downloads.json
-      - aws-s3/sync:
-          arguments: |
-          aws-access-key-id: NPS_AWS_ACCESS_KEY
-          aws-region: NPS_AWS_REGION
-          aws-secret-access-key: NPS_AWS_SECRET_ACCESS_KEY
-          from: 's3://${NPS_BUCKET_NAME}/downloads/'
-          to: static/downloads/
       - run:
           name: "list generated downloads"
           command: |
@@ -542,20 +535,6 @@ jobs:
       - run:
           name: Build Gatsby
           command: npm run build
-      - run:
-          name: deploy preview to cloud.gov
-          command: |
-            pwd && ls -l
-            curl -v -L -o cf-cli_amd64.deb 'https://cli.run.pivotal.io/stable?release=debian64&source=github'
-            sudo dpkg -i cf-cli_amd64.deb
-            cp Staticfile ./public
-            # Set $CF_USERNAME and $CF_PASSWORD in CircleCI settings.
-            # $CF_ORG, $CF_SPACE, and $APP_NAME can also be set in CircleCI settings or hardcoded here.
-            cf api https://api.fr.cloud.gov
-            cf auth "$PROD_CF_USERNAME" "$PROD_CF_PASSWORD"
-            cf target -o "$PROD_CF_ORG" -s "$PROD_CF_SPACE"
-            bash ./swap.sh
-            cf push nrrd -f ./manifest.yml
 workflows:
   audits:
     jobs:
